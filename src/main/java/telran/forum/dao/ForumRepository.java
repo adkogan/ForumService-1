@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import telran.forum.domain.Post;
 
-public interface ForumRepository extends MongoRepository<Post, Integer> {
+public interface ForumRepository extends MongoRepository<Post, String> {
 	Iterable<Post> findByTagsIn(List<String> tags);
 	
 	Iterable<Post> findByAuthor(String author);
