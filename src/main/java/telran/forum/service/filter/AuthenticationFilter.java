@@ -35,6 +35,7 @@ public class AuthenticationFilter implements Filter {
 			throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) reqs;
 		HttpServletResponse response = (HttpServletResponse) resp;
+		//NB! removed annotation @WebFilter, and added this condition 
 		if (request.getServletPath().startsWith("/forum")) {
 			String auth = request.getHeader("Authorization");
 			AccountUserCredential userCredential = userConfiguration.tokenDecode(auth);
