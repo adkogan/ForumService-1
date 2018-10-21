@@ -39,4 +39,27 @@ public class AccountServiceImpl implements AccountService {
 				userRegDto.getFirstName(), userRegDto.getLastName());
 	}
 
+	@Override
+	public UserProfileDto editUser(UserRegisterDto userRegDto, String auth) {
+		// TODO edit forum user
+		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
+		UserAccount userAccount = userRepository.findById(credentials.getLogin()).get();
+		userAccount.setFirstName(userRegDto.getFirstName());
+		userAccount.setLastName(userRegDto.getLastName());
+		return new UserProfileDto(credentials.getLogin(),
+				userRegDto.getFirstName(), userRegDto.getLastName());
+	}
+
+	@Override
+	public UserProfileDto removeUser(String id, String auth) {
+		// TODO remove forum user
+		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
+		if(!credentials.getLogin().equals(id)) {
+			throw new ForbiddenException();
+		}
+		UserAccount userAccount = userRepository.findById(id).get();
+		userRepository.delete(userAccount);
+		return new UserProfileDto(userAccount.getId(), userAccount.getFirstName(), userAccount.getLastName());
+	}
+
 }

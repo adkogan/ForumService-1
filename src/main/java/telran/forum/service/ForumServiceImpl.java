@@ -6,6 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import telran.forum.configuration.AccountConfiguration;
+import telran.forum.configuration.AccountUserCredential;
 import telran.forum.dao.ForumRepository;
 import telran.forum.domain.Comment;
 import telran.forum.domain.Post;
@@ -19,6 +21,9 @@ public class ForumServiceImpl implements ForumService {
 
 	@Autowired
 	ForumRepository repository;
+
+	@Autowired
+	AccountConfiguration accountConfiguration;
 
 	@Override
 	public Post addNewPost(NewPostDto newPost) {
@@ -37,18 +42,28 @@ public class ForumServiceImpl implements ForumService {
 	}
 
 	@Override
-	public Post removePost(String id) {
+	public Post removePost(String id, String auth) {
+		// TODO service remove post
 		Post post = repository.findById(id).orElse(null);
 		if (post != null) {
+			AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
+			if (!credentials.getLogin().equals(post.getAuthor())) {
+				throw new ForbiddenException();
+			}
 			repository.delete(post);
 		}
 		return post;
 	}
 
 	@Override
-	public Post updatePost(PostUpdateDto updatePost) {
+	public Post updatePost(PostUpdateDto updatePost, String auth) {
+		// TODO service update post
 		Post post = repository.findById(updatePost.getId()).orElse(null);
 		if (post != null) {
+			AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
+			if (!credentials.getLogin().equals(post.getAuthor())) {
+				throw new ForbiddenException();
+			}
 			post.setContent(updatePost.getContent());
 			repository.save(post);
 		}
@@ -89,8 +104,7 @@ public class ForumServiceImpl implements ForumService {
 
 	@Override
 	public Iterable<Post> findByDate(DatePeriodDto period) {
-		return repository.findByDateCreatedBetween(LocalDate.parse(period.getFrom()),
-				LocalDate.parse(period.getTo()));
+		return repository.findByDateCreatedBetween(LocalDate.parse(period.getFrom()), LocalDate.parse(period.getTo()));
 	}
 
 }

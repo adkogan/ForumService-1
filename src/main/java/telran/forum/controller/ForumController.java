@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,13 +38,15 @@ public class ForumController {
 	}
 	
 	@DeleteMapping("/post/{id}")
-	public Post removePost(@PathVariable String id) {
-		return service.removePost(id);
+	public Post removePost(@PathVariable String id, @RequestHeader(value = "Authorization") String auth) {
+		//TODO change removePost
+		return service.removePost(id, auth);
 	}
 	
 	@PutMapping("/post")
-	public Post updatePost(@RequestBody PostUpdateDto postUpdateDto) {
-		return service.updatePost(postUpdateDto);
+	public Post updatePost(@RequestBody PostUpdateDto postUpdateDto, @RequestHeader(value = "Authorization") String auth) {
+		//TODO change updatePost
+		return service.updatePost(postUpdateDto, auth);
 	}
 	
 	@PutMapping("/post/{id}/like")
