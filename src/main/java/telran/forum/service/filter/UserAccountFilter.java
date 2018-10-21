@@ -11,6 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,6 @@ public class UserAccountFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest reqs, ServletResponse resp, FilterChain chain)
 			throws IOException, ServletException {
-		// TODO UserAccountFilter method doFilter
 		HttpServletRequest request = (HttpServletRequest) reqs;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		if (request.getServletPath().startsWith("/account")) {
@@ -45,9 +45,10 @@ public class UserAccountFilter implements Filter {
 				if (userAccount == null) {
 					response.sendError(401, "Unauthorized");
 				} else {
-					if (!userAccount.getPassword().equals(userCredential.getPassword())) {
+					if (!BCrypt.checkpw(userCredential.getPassword(), userAccount.getPassword())) {
 						response.sendError(403, "Forbidden");
 					}
+					//userAccount.getPassword().equals(userCredential.getPassword())
 				}
 
 			}

@@ -11,6 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -43,9 +44,10 @@ public class AuthenticationFilter implements Filter {
 			if (userAccount == null) {
 				response.sendError(401, "Unauthorized");
 			} else {
-				if (!userAccount.getPassword().equals(userCredential.getPassword())) {
+				if (!BCrypt.checkpw(userCredential.getPassword(), userAccount.getPassword())) {
 					response.sendError(403, "Forbidden");
 				}
+				//userAccount.getPassword().equals(userCredential.getPassword())
 			}
 		}
 		chain.doFilter(request, response);

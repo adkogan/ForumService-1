@@ -25,7 +25,6 @@ public class AccountConfiguration {
 	}
 
 	public AccountUserCredential tokenDecode(String auth) {
-		// FIXME
 		int pos = auth.indexOf(" ");
 		String token = auth.substring(pos + 1);
 		byte[] decodeBytes = Base64.getDecoder().decode(token);

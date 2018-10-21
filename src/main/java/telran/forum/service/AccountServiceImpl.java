@@ -1,7 +1,9 @@
 package telran.forum.service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +28,10 @@ public class AccountServiceImpl implements AccountService {
 		if (userRepository.existsById(credentials.getLogin())) {
 			throw new UserExistException();
 		}
+		String hashPassword = BCrypt.hashpw(credentials.getPassword(), BCrypt.gensalt());
 		UserAccount userAccount = UserAccount.builder()
 				.id(credentials.getLogin())
-				.password(credentials.getPassword())
+				.password(hashPassword)
 				.firstName(userRegDto.getFirstName())
 				.lastName(userRegDto.getLastName())
 				.role("User")
@@ -41,7 +44,6 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public UserProfileDto editUser(UserRegisterDto userRegDto, String auth) {
-		// TODO edit forum user
 		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
 		UserAccount userAccount = userRepository.findById(credentials.getLogin()).get();
 		userAccount.setFirstName(userRegDto.getFirstName());
@@ -53,9 +55,13 @@ public class AccountServiceImpl implements AccountService {
 
 	@Override
 	public UserProfileDto removeUser(String id, String auth) {
-		// TODO remove forum user
 		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
-		if(!credentials.getLogin().equals(id)) {
+		UserAccount user = userRepository.findById(credentials.getLogin()).get();
+		Set<String> roles = user.getRoles();
+		boolean hasRight = roles.stream()
+				.anyMatch(s -> "Admin".equals(s) || "Moderator".equals(s));
+		hasRight = hasRight || credentials.getLogin().equals(id);
+		if(!hasRight) {
 			throw new ForbiddenException();
 		}
 		UserAccount userAccount = userRepository.findById(id).get();

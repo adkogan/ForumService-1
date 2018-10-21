@@ -39,13 +39,11 @@ public class ForumController {
 	
 	@DeleteMapping("/post/{id}")
 	public Post removePost(@PathVariable String id, @RequestHeader(value = "Authorization") String auth) {
-		//TODO change removePost
 		return service.removePost(id, auth);
 	}
 	
 	@PutMapping("/post")
 	public Post updatePost(@RequestBody PostUpdateDto postUpdateDto, @RequestHeader(value = "Authorization") String auth) {
-		//TODO change updatePost
 		return service.updatePost(postUpdateDto, auth);
 	}
 	
