@@ -46,6 +46,7 @@ public class AccountServiceImpl implements AccountService {
 		UserAccount userAccount = userRepository.findById(credentials.getLogin()).get();
 		userAccount.setFirstName(userRegDto.getFirstName());
 		userAccount.setLastName(userRegDto.getLastName());
+		userRepository.save(userAccount);
 		return new UserProfileDto(credentials.getLogin(),
 				userRegDto.getFirstName(), userRegDto.getLastName());
 	}

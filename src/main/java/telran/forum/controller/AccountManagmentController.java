@@ -33,7 +33,8 @@ public class AccountManagmentController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public UserProfileDto remove(@PathVariable String id, @RequestHeader(value = "Authorization") String auth) {
+	public UserProfileDto remove(@PathVariable String id, 
+			@RequestHeader(value = "Authorization") String auth) {
 		return accountService.removeUser(id,auth);
 	}
 
