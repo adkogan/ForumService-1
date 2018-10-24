@@ -13,6 +13,7 @@ import telran.forum.dao.UserAccountRepository;
 import telran.forum.domain.UserAccount;
 import telran.forum.dto.UserProfileDto;
 import telran.forum.dto.UserRegisterDto;
+import telran.forum.dto.UserRolesDTO;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -28,7 +29,10 @@ public class AccountServiceImpl implements AccountService {
 		if (userRepository.existsById(credentials.getLogin())) {
 			throw new UserExistException();
 		}
-		String hashPassword = BCrypt.hashpw(credentials.getPassword(), BCrypt.gensalt());
+		String hashPassword = BCrypt.hashpw(
+				credentials.getPassword(), 
+				BCrypt.gensalt()
+		);
 		UserAccount userAccount = UserAccount.builder()
 				.id(credentials.getLogin())
 				.password(hashPassword)
@@ -38,10 +42,10 @@ public class AccountServiceImpl implements AccountService {
 				.expDate(LocalDateTime.now().plusDays(accountConfiguration.getExpPeriod()))
 				.build();
 		userRepository.save(userAccount);
-		return new UserProfileDto(credentials.getLogin(),
-				userRegDto.getFirstName(), userRegDto.getLastName());
+		return convertToUserProfile(userAccount);
 	}
-
+	
+	
 	@Override
 	public UserProfileDto editUser(UserRegisterDto userRegDto, String auth) {
 		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
@@ -49,8 +53,7 @@ public class AccountServiceImpl implements AccountService {
 		userAccount.setFirstName(userRegDto.getFirstName());
 		userAccount.setLastName(userRegDto.getLastName());
 		userRepository.save(userAccount);
-		return new UserProfileDto(credentials.getLogin(),
-				userRegDto.getFirstName(), userRegDto.getLastName());
+		return convertToUserProfile(userAccount);
 	}
 
 	@Override
@@ -66,7 +69,41 @@ public class AccountServiceImpl implements AccountService {
 		}
 		UserAccount userAccount = userRepository.findById(id).get();
 		userRepository.delete(userAccount);
-		return new UserProfileDto(userAccount.getId(), userAccount.getFirstName(), userAccount.getLastName());
+		return convertToUserProfile(userAccount);
 	}
+
+
+
+	@Override
+	public UserProfileDto updateRoles(String id, UserRolesDTO userRoles, String auth) {
+		AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
+		UserAccount user = userRepository.findById(credentials.getLogin()).get();
+		boolean hasRight = user
+				.getRoles()
+				.stream()
+				.anyMatch(s -> "Admin".equals(s));
+		if(!hasRight) {
+			throw new ForbiddenException();
+		}
+		
+		
+		UserAccount userAccount = userRepository.findById(id).get();
+		userAccount.setRoles(userRoles.getRoles());
+		userRepository.save(userAccount);
+		return convertToUserProfile(userAccount);
+	}
+
+
+
+	private UserProfileDto convertToUserProfile(UserAccount userAccount) {
+		return new UserProfileDto(
+				userAccount.getId(),
+				userAccount.getFirstName(),
+				userAccount.getLastName(),
+				userAccount.getRoles()
+		);
+	}
+	
+	
 
 }

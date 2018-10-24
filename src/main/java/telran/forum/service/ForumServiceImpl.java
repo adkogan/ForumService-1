@@ -51,8 +51,10 @@ public class ForumServiceImpl implements ForumService {
 	public Post removePost(String id, String auth) {
 		Post post = repository.findById(id).orElse(null);
 		if (post != null) {
-			AccountUserCredential credentials = accountConfiguration.tokenDecode(auth);
-			UserAccount user = userRepository.findById(credentials.getLogin()).get();
+			AccountUserCredential credentials = accountConfiguration.
+					tokenDecode(auth);
+			UserAccount user = userRepository.findById(credentials.getLogin()).
+					get();
 			Set<String> roles = user.getRoles();
 			boolean hasRight = roles.stream()
 					.anyMatch(s -> "Admin".equals(s) || "Moderator".equals(s));
